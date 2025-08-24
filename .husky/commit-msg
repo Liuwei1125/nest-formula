@@ -1,0 +1,11 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# 检查commit消息是否符合规范
+if ! grep -qE '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z\-]+\))?: .{1,}$' "$1"; then
+  echo "\033[31m错误: commit消息不符合规范!\033[0m"
+  echo "\033[33m请使用以下格式: type(scope): subject\033[0m"
+  echo "\033[33m类型包括: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert\033[0m"
+  echo "\033[33m推荐使用: pnpm run commit 命令生成规范化的提交消息\033[0m"
+  exit 1
+fi
