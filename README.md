@@ -12,6 +12,7 @@
 
 - **多格式支持**：支持 TeX、MathML、AsciiMath 等多种数学公式输入格式
 - **灵活输出**：可输出 HTML、SVG、PNG、MathML 等多种格式的渲染结果
+- **云存储集成**：支持将 PNG 格式渲染结果上传至阿里云 OSS
 - **高度可扩展**：采用工厂模式设计，便于添加新的渲染器
 - **请求验证**：使用 class-validator 对输入参数进行严格验证
 - **基于 NestJS**：利用 NestJS 框架的强大功能，提供高性能、可维护的服务
@@ -21,6 +22,8 @@
 - **核心框架**：NestJS
 - **编程语言**：TypeScript
 - **公式渲染**：MathJax
+- **云存储**：ali-oss
+- **配置管理**：@nestjs/config
 - **请求验证**：class-validator、class-transformer
 - **代码规范**：ESLint、Prettier、Husky、Lint-Staged
 - **提交规范**：Commitizen、Conventional Changelog
@@ -65,6 +68,8 @@ $ pnpm run start:prod
 | scale | number | 否 | 缩放比例 | 0.1-100，默认 1 |
 | product | string | 否 | 产品线名称 | - |
 | token | string | 否 | 产品线密钥 | - |
+| uploadToCloud | boolean | 否 | 是否上传至云存储（仅PNG格式） | `true`, `false`，默认 `false` |
+| filename | string | 否 | 云存储文件名（仅PNG格式） | -，默认 `formula-image` |
 
 **示例请求**：
 
@@ -75,9 +80,28 @@ curl "http://localhost:8000/formula?inputType=TeX&outputType=html&formula=E%3Dmc
 
 **示例响应**：
 
+普通渲染响应（不上传云存储）：
 ```json
 {
   "result": "<div class='mathjax-container' style='display: inline-block; overflow-x: auto; overflow-y: hidden; max-width: 100%;'>...</div>",
+  "success": true
+}
+```
+
+PNG上传云存储响应：
+```json
+{
+  "result": {
+    "png": "iVBORw0KGgoAAAANSUhEUgAA...",
+    "base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+    "dpi": 300,
+    "dimensions": {"width": 400, "height": 200},
+    "oss": {
+      "url": "https://your-bucket.oss-cn-region.aliyuncs.com/your-file.png",
+      "filename": "your-file.png",
+      "size": 1024
+    }
+  },
   "success": true
 }
 ```
@@ -92,14 +116,36 @@ src/
 ├── main.ts               # 应用入口文件
 └── modules/
     └── formula/          # 公式渲染模块
+        ├── config/       # 配置文件
+        │   └── oss.config.ts      # OSS配置
         ├── dto/          # 数据传输对象
         │   └── formula.dto.ts
         ├── formula.controller.ts  # 公式控制器
         ├── formula.module.ts      # 公式模块
         ├── formula.service.ts     # 公式服务
-        └── renderers/    # 渲染器实现
-            ├── interfaces/         # 渲染器接口
-            └── renderer.factory.ts # 渲染器工厂
+        ├── modules/      # 子模块
+        │   └── oss.module.ts      # OSS模块
+        ├── renderers/    # 渲染器实现
+        │   ├── interfaces/         # 渲染器接口
+        │   └── renderer.factory.ts # 渲染器工厂
+        └── services/     # 服务实现
+            └── oss.service.ts      # OSS服务
+```
+
+## 环境变量配置
+
+项目使用环境变量进行配置，特别是阿里云OSS相关的配置。创建 `.env` 文件（可参考 `.env.example`）并设置以下变量：
+
+```env
+# 服务器配置
+PORT=8000
+
+# 阿里云OSS配置
+OSS_REGION=oss-cn-region       # OSS地域
+OSS_ACCESS_KEY_ID=your-key-id  # 访问密钥ID
+OSS_ACCESS_KEY_SECRET=your-key-secret # 访问密钥
+OSS_BUCKET=your-bucket-name    # OSS存储空间名称
+OSS_EXPIRES=3600               # 签名URL有效期（秒，可选）
 ```
 
 ## 开发指南
