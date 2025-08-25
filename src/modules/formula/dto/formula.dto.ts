@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNotEmpty, IsIn, IsNumber, Min, Max } from "class-validator";
+import { IsString, IsOptional, IsNotEmpty, IsIn, IsNumber, Min, Max, IsBoolean } from "class-validator";
 
 export class FormulaDto {
 
@@ -31,5 +31,15 @@ export class FormulaDto {
     @Max(100)
     @IsNumber()
     scale: number = 1;
+
+    // 是否上传到阿里云OSS
+    @IsOptional()
+    @IsBoolean()
+    uploadToCloud: boolean = false;
+
+    // 上传文件名（不含扩展名）
+    @IsOptional()
+    @IsString()
+    filename: string = 'formula-image';
     
 }

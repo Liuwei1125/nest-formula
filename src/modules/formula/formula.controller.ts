@@ -12,7 +12,6 @@ export class FormulaController {
     render(
         @Query() dto: FormulaDto
     ) {
-        console.log(dto);
         return this.formulaService.render(dto);
     }
     

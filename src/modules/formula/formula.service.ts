@@ -10,7 +10,6 @@ export class FormulaService {
     ) { }
 
     render(dto: FormulaDto) {
-        console.log(dto);
         const renderer = this.rendererFactory.getRenderer(dto);
         return renderer.render(dto);
     }
